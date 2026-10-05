@@ -54,7 +54,7 @@ breaking.
 * **Video → Video Fit** — `Contain` letterboxes a 16:9 video inside a portrait card; `Cover` crops it to fill.
 * **Video → Privacy Mode** — embeds via `youtube-nocookie.com` and sends Vimeo `dnt=1`, so no tracking
   cookies are set before playback.
-* **Video → Show Provider Controls** — turning this **off** is what removes YouTube's title and channel bar.
+* **Video → Crop Provider Chrome** — the only way to remove YouTube's title and channel bar.
   See the note below.
 * **Video → Preload** — applies only after a click; nothing is fetched before that.
 * **Style → Card → Aspect Ratio** — 9:16 by default, with 4:5, 1:1 and 16:9 available per device.
@@ -70,19 +70,24 @@ If the plugin saved you some time, you can buy me a coffee on
 
 ## A note on YouTube branding
 
-Vimeo lets you hide its chrome completely, which is why a Vimeo card looks clean. YouTube does not.
+Vimeo lets you hide its chrome completely, which is why a Vimeo card looks clean. YouTube does not, and no
+embed parameter changes that:
 
-`modestbranding=1` has been **ignored by YouTube since August 2023** — the plugin still sends it, but it no
-longer does anything. What remains visible with controls on is the video title, the channel name and avatar,
-and on Shorts the "Shorts" watermark.
+* `modestbranding=1` has been **ignored since August 2023**. The plugin still sends it; it does nothing.
+* `showinfo=0`, which used to hide the title, was **removed in 2018**.
+* `controls=0` hides only the control *buttons*. The title, channel name, avatar and the Shorts watermark
+  stay on screen. (Verified against a Shorts embed, both states side by side.)
 
-The one setting that actually removes the title and channel bar is **Video → Show Provider Controls → off**.
-The video then plays with no chrome; visitors can still click it to pause, and the plugin's own close button
-stays available. The watermark and the "Watch on YouTube" affordance cannot be removed at all — YouTube's
-terms require them.
+The chrome is hidden while the video plays uninterrupted and reappears on hover or pause — which is when
+most people notice it.
 
-If a completely unbranded player matters more than hosting on YouTube, serve those testimonials as
-self-hosted MP4s from the Media Library instead: the HTML5 player has no branding of any kind.
+**The one thing that works is cropping it:** `Video → Crop Provider Chrome`. This scales the player taller
+than the card so the header and the watermark fall outside the visible area. About **130%** clears both. The
+trade-off is a zoomed-in video that loses a little off the top and bottom, so it is set to 100% (off) by
+default — Vimeo and self-hosted video need no cropping.
+
+If a completely unbranded, uncropped player matters more than hosting on YouTube, serve those testimonials
+as self-hosted MP4s from the Media Library: the HTML5 player has no branding of any kind.
 
 ## A note on "return to image when video ends"
 

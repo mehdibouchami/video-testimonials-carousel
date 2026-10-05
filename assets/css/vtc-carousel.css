@@ -147,6 +147,15 @@
 	border: 0;
 }
 
+/* YouTube offers no way to hide its title/channel header or the Shorts
+   watermark, so the only lever is to grow the iframe past the card and let
+   overflow clip them. Height only, centred, so nothing is lost left or right. */
+.vtc__player iframe {
+	top: 50%;
+	height: calc(100% * var(--vtc-embed-zoom, 1));
+	transform: translateY(-50%);
+}
+
 .vtc__player video {
 	object-fit: contain;
 	background-color: #000;
@@ -166,7 +175,7 @@
 	min-width: 100%;
 	min-height: 100%;
 	aspect-ratio: 16 / 9;
-	transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%) scale(var(--vtc-embed-zoom, 1));
 }
 
 /* --------------------------------------------------------------------------

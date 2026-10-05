@@ -29,6 +29,34 @@ class VTC_Plugin {
 		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
 		add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_scripts' ) );
 		add_action( 'elementor/frontend/after_register_styles', array( $this, 'register_styles' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Add issue and support links to this plugin's row on the Plugins screen.
+	 *
+	 * @param array  $links Row meta links.
+	 * @param string $file  Plugin file the row belongs to.
+	 * @return array
+	 */
+	public function plugin_row_meta( $links, $file ) {
+		if ( plugin_basename( VTC_PATH . 'video-testimonials-carousel.php' ) !== $file ) {
+			return $links;
+		}
+
+		$links[] = sprintf(
+			'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>',
+			esc_url( 'https://github.com/mehdibouchami/video-testimonials-carousel/issues' ),
+			esc_html__( 'Report an issue', 'video-testimonials-carousel' )
+		);
+
+		$links[] = sprintf(
+			'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>',
+			esc_url( 'https://ba9chich.com/fr/mehdibouchami' ),
+			esc_html__( 'Support the developer', 'video-testimonials-carousel' )
+		);
+
+		return $links;
 	}
 
 	/**

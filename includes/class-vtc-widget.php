@@ -484,7 +484,29 @@ class VTC_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Show Provider Controls', 'video-testimonials-carousel' ),
 				'type'        => Controls_Manager::SWITCHER,
 				'default'     => 'yes',
-				'description' => esc_html__( 'Off also removes the YouTube title and channel bar. The visitor can still pause by clicking the video, and the close button stays available.', 'video-testimonials-carousel' ),
+				'description' => esc_html__( 'Off hides the provider control bar. On YouTube it leaves the title and channel header in place — use Crop Provider Chrome below for that.', 'video-testimonials-carousel' ),
+			)
+		);
+
+		$this->add_control(
+			'embed_zoom',
+			array(
+				'label'       => esc_html__( 'Crop Provider Chrome', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array(
+					'%' => array(
+						'min'  => 100,
+						'max'  => 160,
+						'step' => 1,
+					),
+				),
+				'default'     => array(
+					'size' => 100,
+					'unit' => '%',
+				),
+				'description' => esc_html__( 'YouTube gives no way to hide its title, channel name and Shorts watermark. Scaling the player past 100% pushes them outside the card. Around 130% clears both; the trade-off is that the video is zoomed in and loses a little top and bottom. Leave at 100% for Vimeo and self-hosted video, which need no cropping.', 'video-testimonials-carousel' ),
+				'selectors'   => array( '{{WRAPPER}} .vtc' => '--vtc-embed-zoom: calc({{SIZE}} / 100);' ),
 			)
 		);
 
