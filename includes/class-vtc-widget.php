@@ -1025,35 +1025,6 @@ class VTC_Widget extends Widget_Base {
 	 * ------------------------------------------------------------------ */
 
 	/**
-	 * Resolve the breakpoints Elementor is actually using, so the Swiper
-	 * breakpoints match where the responsive controls switch over.
-	 *
-	 * @return array
-	 */
-	private function get_breakpoint_values() {
-		$values = array(
-			'mobileMax' => 767,
-			'tabletMax' => 1024,
-		);
-
-		if ( ! class_exists( '\Elementor\Plugin' ) || ! isset( \Elementor\Plugin::$instance->breakpoints ) ) {
-			return $values;
-		}
-
-		$active = \Elementor\Plugin::$instance->breakpoints->get_active_breakpoints();
-
-		if ( isset( $active['mobile'] ) ) {
-			$values['mobileMax'] = (int) $active['mobile']->get_value();
-		}
-
-		if ( isset( $active['tablet'] ) ) {
-			$values['tabletMax'] = (int) $active['tablet']->get_value();
-		}
-
-		return $values;
-	}
-
-	/**
 	 * Per-device value for a responsive control, falling back to the desktop value.
 	 *
 	 * @param array  $settings Widget settings.
@@ -1196,7 +1167,6 @@ class VTC_Widget extends Widget_Base {
 				'mobile'  => (float) $spv['mobile'],
 			),
 			'gap'                => $gaps,
-			'breakpoints'        => $this->get_breakpoint_values(),
 			'loop'               => 'yes' === $settings['loop'],
 			'speed'              => (int) $settings['speed'],
 			'grabCursor'         => 'yes' === $settings['grab_cursor'],

@@ -40,6 +40,72 @@
 	 * Carousel
 	 * --------------------------------------------------------------- */
 
+	/**
+	 * Read the layout from the CSS custom properties Elementor generates.
+	 *
+	 * Elementor already emits --vtc-spv and --vtc-gap inside media queries built
+	 * from the site's own breakpoints, including any custom ones. Reading them
+	 * back is both simpler and more correct than rebuilding that breakpoint map
+	 * in JavaScript, and it keeps the pre-init CSS layout and the Swiper layout
+	 * driven by a single source of truth.
+	 *
+	 * @param {Element} root         The .vtc element.
+	 * @param {number}  fallbackSpv  Slides per view if the property is missing.
+	 * @param {number}  fallbackGap  Gap if the property is missing.
+	 * @return {{spv: number, gap: number}}
+	 */
+	function readLayout( root, fallbackSpv, fallbackGap ) {
+		var styles = window.getComputedStyle( root );
+		var spv = parseFloat( styles.getPropertyValue( '--vtc-spv' ) );
+		var gap = parseFloat( styles.getPropertyValue( '--vtc-gap' ) );
+
+		return {
+			spv: spv > 0 ? spv : fallbackSpv,
+			gap: gap >= 0 ? gap : fallbackGap
+		};
+	}
+
+	/**
+	 * Fallback values from the widget config, used only when the CSS properties
+	 * are unavailable.
+	 *
+	 * @param {Object} cfg Widget config.
+	 * @return {{spv: number, gap: number}}
+	 */
+	function configFallback( cfg ) {
+		var spv = cfg.slidesPerView || {};
+		var gap = cfg.gap || {};
+
+		return {
+			spv: spv.desktop || 4,
+			gap: typeof gap.desktop === 'number' ? gap.desktop : 16
+		};
+	}
+
+	/**
+	 * Re-read the layout after a resize or an editor device switch.
+	 *
+	 * @param {Element} root The .vtc element.
+	 */
+	function syncLayout( root ) {
+		var swiper = root.vtcSwiper;
+
+		if ( ! swiper || swiper.destroyed ) {
+			return;
+		}
+
+		var fallback = configFallback( root.vtcCfg || {} );
+		var layout = readLayout( root, fallback.spv, fallback.gap );
+
+		if ( swiper.params.slidesPerView === layout.spv && swiper.params.spaceBetween === layout.gap ) {
+			return;
+		}
+
+		swiper.params.slidesPerView = layout.spv;
+		swiper.params.spaceBetween = layout.gap;
+		swiper.update();
+	}
+
 	function createSwiper( root, cfg ) {
 		var el = root.querySelector( '.vtc__swiper' );
 
@@ -48,40 +114,23 @@
 		}
 
 		var spv = cfg.slidesPerView || {};
-		var gap = cfg.gap || {};
-		var bp = cfg.breakpoints || {};
-		var mobileMax = bp.mobileMax || 767;
-		var tabletMax = bp.tabletMax || 1024;
-
-		var perView = {
-			desktop: spv.desktop || 4,
-			tablet: spv.tablet || spv.desktop || 2,
-			mobile: spv.mobile || 1
-		};
-
 		var count = cfg.count || el.querySelectorAll( '.swiper-slide' ).length;
-		var widest = Math.max( perView.desktop, perView.tablet, perView.mobile );
+
+		// The widest any breakpoint goes decides whether looping is worth it at all.
+		var widest = Math.max( spv.desktop || 4, spv.tablet || 0, spv.mobile || 0 );
+
+		var fallback = configFallback( cfg );
+		var layout = readLayout( root, fallback.spv, fallback.gap );
 
 		var options = {
-			slidesPerView: perView.mobile,
-			spaceBetween: typeof gap.mobile === 'number' ? gap.mobile : 16,
+			slidesPerView: layout.spv,
+			spaceBetween: layout.gap,
 			// Looping with no more slides than fit leaves Swiper with blank space.
 			loop: !! cfg.loop && count > widest,
 			speed: cfg.speed || 500,
 			grabCursor: !! cfg.grabCursor,
 			watchOverflow: true,
-			a11y: { enabled: true },
-			breakpoints: {}
-		};
-
-		// Elementor's breakpoints are max-width, Swiper's are min-width.
-		options.breakpoints[ mobileMax + 1 ] = {
-			slidesPerView: perView.tablet,
-			spaceBetween: typeof gap.tablet === 'number' ? gap.tablet : 16
-		};
-		options.breakpoints[ tabletMax + 1 ] = {
-			slidesPerView: perView.desktop,
-			spaceBetween: typeof gap.desktop === 'number' ? gap.desktop : 16
+			a11y: { enabled: true }
 		};
 
 		if ( cfg.dots ) {
@@ -542,7 +591,26 @@
 		root.vtcSwiper = createSwiper( root, cfg );
 
 		bindCards( root );
+
+		// Fonts and late CSS can change the computed properties after init.
+		syncLayout( root );
 	}
+
+	var resizeTimer = null;
+
+	function onViewportChange() {
+		window.clearTimeout( resizeTimer );
+
+		resizeTimer = window.setTimeout( function () {
+			Array.prototype.forEach.call(
+				document.querySelectorAll( '.vtc[data-vtc-ready]' ),
+				syncLayout
+			);
+		}, 100 );
+	}
+
+	window.addEventListener( 'resize', onViewportChange );
+	window.addEventListener( 'orientationchange', onViewportChange );
 
 	function initAll( scope ) {
 		var context = scope && scope.querySelectorAll ? scope : document;
