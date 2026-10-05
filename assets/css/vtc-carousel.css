@@ -1,0 +1,328 @@
+/**
+ * Video Testimonials Carousel
+ *
+ * Every tunable is a custom property with a fallback, so the widget looks right
+ * before a single Elementor control has been touched.
+ */
+
+.vtc {
+	position: relative;
+}
+
+/* --------------------------------------------------------------------------
+ * Card
+ * ----------------------------------------------------------------------- */
+
+.vtc__card {
+	position: relative;
+	display: block;
+	width: 100%;
+	aspect-ratio: var(--vtc-ratio, 9 / 16);
+	overflow: hidden;
+	border-radius: var(--vtc-radius, 12px);
+	background-color: #000;
+}
+
+/* Older browsers without aspect-ratio keep the 9:16 box via the padding trick. */
+@supports not (aspect-ratio: 1 / 1) {
+	.vtc__card::before {
+		content: "";
+		display: block;
+		padding-top: 177.78%;
+	}
+}
+
+.vtc__img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	object-fit: cover;
+	transition: transform 0.4s ease, opacity 0.2s ease;
+}
+
+/* The tint sits over the image but under the play button. */
+.vtc__card::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+	background-color: var(--vtc-overlay, transparent);
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
+
+/* Only cards that actually have a video react to the pointer. */
+.vtc__card--video {
+	cursor: pointer;
+}
+
+.vtc__card--video:hover .vtc__img {
+	transform: scale(var(--vtc-zoom, 1.05));
+}
+
+.vtc__card--video:focus-visible {
+	outline: 2px solid var(--vtc-play-color, #fff);
+	outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+ * Play button
+ * ----------------------------------------------------------------------- */
+
+.vtc__play {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: content-box;
+	width: var(--vtc-play-size, 28px);
+	height: var(--vtc-play-size, 28px);
+	padding: var(--vtc-play-pad, 18px);
+	color: var(--vtc-play-color, #fff);
+	background-color: var(--vtc-play-bg, rgba(0, 0, 0, 0.45));
+	border-radius: var(--vtc-play-radius, 50%);
+	opacity: var(--vtc-play-opacity, 1);
+	transform: translate(-50%, -50%);
+	transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+	pointer-events: none;
+}
+
+.vtc__play svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+	fill: currentColor;
+}
+
+.vtc__card--video:hover .vtc__play,
+.vtc__card--video:focus-visible .vtc__play {
+	color: var(--vtc-play-color-hover, var(--vtc-play-color, #fff));
+	background-color: var(--vtc-play-bg-hover, var(--vtc-play-bg, rgba(0, 0, 0, 0.45)));
+	transform: translate(-50%, -50%) scale(var(--vtc-play-scale, 1.08));
+}
+
+/* --------------------------------------------------------------------------
+ * Player — empty until the card is clicked
+ * ----------------------------------------------------------------------- */
+
+.vtc__player {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 3;
+	display: none;
+	background-color: #000;
+}
+
+.vtc__card.is-playing .vtc__player {
+	display: block;
+}
+
+.vtc__card.is-playing .vtc__img,
+.vtc__card.is-playing .vtc__play,
+.vtc__card.is-playing::after {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.vtc__player iframe,
+.vtc__player video {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	border: 0;
+}
+
+.vtc__player video {
+	object-fit: contain;
+	background-color: #000;
+}
+
+/* Cover: fill the card and crop the overflow. An iframe cannot use object-fit,
+   so it is sized by aspect ratio and centred instead. */
+.vtc[data-fit="cover"] .vtc__player video {
+	object-fit: cover;
+}
+
+.vtc[data-fit="cover"] .vtc__player iframe {
+	top: 50%;
+	left: 50%;
+	width: auto;
+	height: auto;
+	min-width: 100%;
+	min-height: 100%;
+	aspect-ratio: 16 / 9;
+	transform: translate(-50%, -50%);
+}
+
+/* --------------------------------------------------------------------------
+ * Close button
+ * ----------------------------------------------------------------------- */
+
+.vtc__close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	z-index: 4;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	color: #fff;
+	background-color: rgba(0, 0, 0, 0.6);
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.vtc__close:hover {
+	background-color: rgba(0, 0, 0, 0.85);
+}
+
+.vtc__close svg {
+	width: 16px;
+	height: 16px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+/* --------------------------------------------------------------------------
+ * Arrows
+ * ----------------------------------------------------------------------- */
+
+.vtc__arrow {
+	position: absolute;
+	top: 50%;
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--vtc-arrow-box, 44px);
+	height: var(--vtc-arrow-box, 44px);
+	padding: 0;
+	color: var(--vtc-arrow-color, #fff);
+	background-color: var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5));
+	border: 0;
+	border-radius: var(--vtc-arrow-radius, 50%);
+	cursor: pointer;
+	transform: translateY(-50%);
+	transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.vtc__arrow:hover {
+	color: var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff));
+	background-color: var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5)));
+}
+
+.vtc__arrow svg {
+	width: var(--vtc-arrow-size, 18px);
+	height: var(--vtc-arrow-size, 18px);
+	display: block;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.vtc__arrow--prev {
+	left: var(--vtc-arrow-offset, 8px);
+}
+
+.vtc__arrow--next {
+	right: var(--vtc-arrow-offset, 8px);
+}
+
+.vtc__arrow.swiper-button-disabled {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+ * Dots
+ * ----------------------------------------------------------------------- */
+
+.vtc .vtc__dots.swiper-pagination {
+	position: static;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--vtc-dot-gap, 8px);
+	margin-top: var(--vtc-dots-offset, 16px);
+	width: auto;
+	transform: none;
+}
+
+.vtc .vtc__dots .swiper-pagination-bullet {
+	width: var(--vtc-dot-size, 8px);
+	height: var(--vtc-dot-size, 8px);
+	margin: 0;
+	background-color: var(--vtc-dot-color, #d0d0d0);
+	opacity: 1;
+}
+
+.vtc .vtc__dots .swiper-pagination-bullet-active {
+	background-color: var(--vtc-dot-active, #1a1a1a);
+}
+
+/* --------------------------------------------------------------------------
+ * Before Swiper initialises (and if it never does): a usable scroll row
+ * at the right widths, so nothing jumps.
+ * ----------------------------------------------------------------------- */
+
+.vtc__swiper:not(.swiper-initialized):not(.swiper-container-initialized) {
+	overflow: hidden;
+}
+
+.vtc__swiper:not(.swiper-initialized):not(.swiper-container-initialized) .swiper-wrapper {
+	display: flex;
+	gap: var(--vtc-gap, 16px);
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+}
+
+.vtc__swiper:not(.swiper-initialized):not(.swiper-container-initialized) .swiper-slide {
+	flex: 0 0 auto;
+	width: calc((100% - (var(--vtc-spv, 4) - 1) * var(--vtc-gap, 16px)) / var(--vtc-spv, 4));
+	scroll-snap-align: start;
+}
+
+/* --------------------------------------------------------------------------
+ * Misc
+ * ----------------------------------------------------------------------- */
+
+.vtc__close[hidden] {
+	display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.vtc__img,
+	.vtc__play,
+	.vtc__arrow {
+		transition: none;
+	}
+
+	.vtc__card--video:hover .vtc__img {
+		transform: none;
+	}
+}
