@@ -178,6 +178,16 @@
 	transform: translate(-50%, -50%) scale(var(--vtc-embed-zoom, 1));
 }
 
+/* A card paused because it was scrolled away keeps its player mounted and
+   brings the play button back above it, so one click resumes where it was. */
+.vtc__card.is-playing.is-paused .vtc__play {
+	opacity: var(--vtc-play-opacity, 1);
+	visibility: visible;
+	z-index: 5;
+	pointer-events: auto;
+	cursor: pointer;
+}
+
 /* --------------------------------------------------------------------------
  * Close button
  * ----------------------------------------------------------------------- */

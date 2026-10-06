@@ -2,15 +2,17 @@
 Contributors: mehdibouchami
 Tags: elementor, carousel, testimonials, video, slider
 Requires at least: 5.9
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 A testimonial carousel where video is optional per card. Players are built only on click, so nothing loads until a visitor asks for it.
 
 == Description ==
+
+**Elementor is required.** The free Elementor plugin, version 3.5 or newer, must be installed and active; Elementor Pro is not needed. WordPress will enforce this for you on 6.5 and above, and the plugin stays inert with an admin notice otherwise.
 
 An Elementor widget that shows testimonial cards in a carousel. Each card is an image, and **a video is optional**: paste a URL and the card becomes clickable, leave it empty and the card stays a plain image with no play button and no click behaviour.
 
@@ -31,6 +33,7 @@ Because the players are only built on click, the videos would otherwise be invis
 = Playback behaviour =
 
 * Only one video plays at a time, anywhere on the page
+* A video stops when its card is swiped past or scrolled off the screen, so nothing keeps talking out of sight. It can pause and resume instead, or be left playing
 * Carousel autoplay pauses during playback and resumes afterwards
 * The card returns to its image when the video ends
 * A close button sits over the player
@@ -86,6 +89,10 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 
 == Changelog ==
 
+= 1.3.0 =
+* A playing video now stops when its card is swiped past or scrolled out of view, instead of carrying on unseen. Choose Pause or Keep playing instead under Video → When Scrolled Out Of View.
+* Measured from how much of the card is actually visible, so it behaves correctly at any number of slides per view.
+
 = 1.2.0 =
 * Added VideoObject JSON-LD for every card that has a video, with per-card title, description, upload date and duration fields.
 * Added eager loading and high fetch priority for the first card images, so the carousel does not delay Largest Contentful Paint.
@@ -107,6 +114,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Videos no longer keep playing after you swipe past them, which mattered most on phones showing one card at a time.
 
 = 1.2.0 =
 Adds VideoObject structured data so click-to-play videos are visible to search engines, plus Largest Contentful Paint improvements.

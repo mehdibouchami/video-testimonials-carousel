@@ -431,6 +431,21 @@ class VTC_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'offscreen',
+			array(
+				'label'       => esc_html__( 'When Scrolled Out Of View', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'stop',
+				'options'     => array(
+					'stop'  => esc_html__( 'Stop and show the image', 'video-testimonials-carousel' ),
+					'pause' => esc_html__( 'Pause', 'video-testimonials-carousel' ),
+					'none'  => esc_html__( 'Keep playing', 'video-testimonials-carousel' ),
+				),
+				'description' => esc_html__( 'What happens when the playing card is swiped past or scrolled off the screen. Measured from how much of the card is actually visible, so it works at any number of slides per view. Pause keeps the position and resumes when the play button is clicked, so it suits you best with the play button shown.', 'video-testimonials-carousel' ),
+			)
+		);
+
+		$this->add_control(
 			'embed_fit',
 			array(
 				'label'       => esc_html__( 'Video Fit', 'video-testimonials-carousel' ),
@@ -1442,6 +1457,7 @@ class VTC_Widget extends Widget_Base {
 			'pauseOnHover'       => 'yes' === $settings['pause_on_hover'],
 			'pauseOnInteraction' => 'yes' === $settings['pause_on_interaction'],
 			'revertOnEnd'        => 'yes' === $settings['revert_on_end'],
+			'offscreen'          => isset( $settings['offscreen'] ) ? (string) $settings['offscreen'] : 'stop',
 			'selfControls'       => 'yes' === $settings['self_controls'],
 			'selfMuted'          => 'yes' === $settings['self_muted'],
 			'selfPreload'        => (string) $settings['self_preload'],

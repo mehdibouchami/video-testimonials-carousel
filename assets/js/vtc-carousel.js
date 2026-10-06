@@ -377,8 +377,123 @@
 	}
 
 	/* ------------------------------------------------------------------
-	 * Play / stop
+	 * Play / pause / stop
 	 * --------------------------------------------------------------- */
+
+	/**
+	 * Below this much of the card still showing, the video counts as gone.
+	 */
+	var OFFSCREEN_THRESHOLD = 0.25;
+
+	/**
+	 * Drive the active player without loading either vendor SDK. YouTube needs
+	 * enablejsapi=1, which the embed already carries.
+	 *
+	 * @param {Element} node     The iframe or video element.
+	 * @param {string}  provider youtube|vimeo|self
+	 * @param {string}  command  "pause" or "play"
+	 */
+	function playerCommand( node, provider, command ) {
+		if ( ! node ) {
+			return;
+		}
+
+		if ( 'VIDEO' === node.tagName ) {
+			if ( 'pause' === command ) {
+				try {
+					node.pause();
+				} catch ( e ) {}
+
+				return;
+			}
+
+			var resumed = node.play();
+
+			if ( resumed && typeof resumed.catch === 'function' ) {
+				resumed.catch( function () {} );
+			}
+
+			return;
+		}
+
+		if ( ! node.contentWindow ) {
+			return;
+		}
+
+		var origin = 'youtube' === provider
+			? ( node.src.indexOf( 'youtube-nocookie' ) !== -1 ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com' )
+			: VIMEO_ORIGIN;
+
+		var message = 'youtube' === provider
+			? { event: 'command', func: 'pause' === command ? 'pauseVideo' : 'playVideo', args: [] }
+			: { method: 'pause' === command ? 'pause' : 'play' };
+
+		node.contentWindow.postMessage( JSON.stringify( message ), origin );
+	}
+
+	function pauseActive() {
+		if ( ! active || active.paused ) {
+			return;
+		}
+
+		playerCommand( active.node, active.provider, 'pause' );
+		active.paused = true;
+		active.card.classList.add( 'is-paused' );
+	}
+
+	/**
+	 * @param {Element} card The card clicked.
+	 * @return {boolean} True when this click resumed a paused video.
+	 */
+	function resumeCard( card ) {
+		if ( ! active || active.card !== card || ! active.paused ) {
+			return false;
+		}
+
+		playerCommand( active.node, active.provider, 'play' );
+		active.paused = false;
+		card.classList.remove( 'is-paused' );
+
+		return true;
+	}
+
+	/**
+	 * Stop or pause the video once its card is mostly off screen — swiped past
+	 * inside the carousel, or scrolled off the page. IntersectionObserver covers
+	 * both, because it accounts for the carousel's own overflow clipping.
+	 *
+	 * @param {Element} card The playing card.
+	 * @param {string}  mode stop|pause|none
+	 * @return {IntersectionObserver|null}
+	 */
+	function watchVisibility( card, mode ) {
+		if ( 'none' === mode || typeof window.IntersectionObserver !== 'function' ) {
+			return null;
+		}
+
+		var observer = new window.IntersectionObserver(
+			function ( entries ) {
+				var entry = entries[ entries.length - 1 ];
+
+				if ( ! entry || entry.intersectionRatio >= OFFSCREEN_THRESHOLD ) {
+					return;
+				}
+
+				if ( 'pause' === mode ) {
+					pauseActive();
+
+					return;
+				}
+
+				stopActive( false );
+			},
+			{ threshold: [ 0, OFFSCREEN_THRESHOLD ] }
+		);
+
+		observer.observe( card );
+
+		return observer;
+	}
 
 	function stopActive( returnFocus ) {
 		if ( ! active ) {
@@ -391,6 +506,10 @@
 
 		if ( current.onMessage ) {
 			window.removeEventListener( 'message', current.onMessage );
+		}
+
+		if ( current.observer ) {
+			current.observer.disconnect();
 		}
 
 		if ( current.node ) {
@@ -411,6 +530,7 @@
 
 		if ( current.card ) {
 			current.card.classList.remove( 'is-playing' );
+			current.card.classList.remove( 'is-paused' );
 
 			var close = current.card.querySelector( '.vtc__close' );
 
@@ -489,9 +609,14 @@
 			card: card,
 			root: root,
 			node: node,
+			provider: provider,
+			paused: false,
 			onMessage: onMessage,
+			observer: null,
 			resumeAutoplay: resumeAutoplay
 		};
+
+		active.observer = watchVisibility( card, cfg.offscreen || 'stop' );
 	}
 
 	/* ------------------------------------------------------------------
@@ -540,6 +665,9 @@
 			}
 
 			if ( card.classList.contains( 'is-playing' ) ) {
+				// A card paused by scrolling away resumes on the next click.
+				resumeCard( card );
+
 				return;
 			}
 
@@ -562,7 +690,9 @@
 			if ( 'Enter' === event.key || ' ' === event.key || 'Spacebar' === event.key ) {
 				event.preventDefault();
 
-				if ( ! card.classList.contains( 'is-playing' ) ) {
+				if ( card.classList.contains( 'is-playing' ) ) {
+					resumeCard( card );
+				} else {
 					play( card, root );
 				}
 			}

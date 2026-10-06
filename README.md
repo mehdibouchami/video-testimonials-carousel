@@ -43,6 +43,12 @@ breaking.
 ## Behaviour while a video plays
 
 * Only one video plays at a time, anywhere on the page. Opening a second card tears the first one down.
+* **A video stops when its card leaves the screen** (**Video → When Scrolled Out Of View**). This matters most
+  on phones showing one card at a time, where swiping on would otherwise leave a video talking out of sight.
+  It is measured from how much of the card is actually visible rather than from the slide index, so it behaves
+  the same whether you show one card or four, and it catches scrolling past the carousel as well as swiping
+  within it. `Pause` keeps the position and resumes when the play button is clicked; `Keep playing` is the old
+  behaviour.
 * Carousel autoplay pauses, and resumes when the video ends or is closed.
 * The card returns to its image when the video ends (**Video → Return To Image When Video Ends**).
 * A close button sits over the player (**Video → Close Button While Playing**).
