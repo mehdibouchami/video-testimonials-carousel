@@ -342,6 +342,20 @@
 	pointer-events: none;
 }
 
+/* Swiper marks the controls "locked" when every slide already fits. Its own rule
+   for that is a single class and loses to ours, so it has to be repeated here at
+   matching weight. */
+.vtc .vtc__arrow.swiper-button-lock {
+	display: none;
+}
+
+/* And the same when every card fits at this breakpoint. This is the one that
+   does the work when looping is on, since duplicate slides stop Swiper from
+   ever considering itself locked. */
+.vtc.vtc--fits .vtc__arrow {
+	display: none;
+}
+
 /* --------------------------------------------------------------------------
  * Dots
  * ----------------------------------------------------------------------- */
@@ -367,6 +381,13 @@
 
 .vtc .vtc__dots .swiper-pagination-bullet-active {
 	background-color: var(--vtc-dot-active, #1a1a1a);
+}
+
+/* Same as the arrows: nothing to page through, so no dots and no gap left
+   behind where they were. */
+.vtc .vtc__dots.swiper-pagination-lock,
+.vtc.vtc--fits .vtc__dots.swiper-pagination {
+	display: none;
 }
 
 /* --------------------------------------------------------------------------

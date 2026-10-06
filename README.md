@@ -49,6 +49,11 @@ breaking.
   the same whether you show one card or four, and it catches scrolling past the carousel as well as swiping
   within it. `Pause` keeps the position and resumes when the play button is clicked; `Keep playing` is the old
   behaviour.
+* **Arrows and dots hide themselves where they are pointless.** At any breakpoint where every card already
+  fits — five cards shown five per row, say — the controls disappear, and they return at breakpoints where
+  the cards do not fit, such as one per row on a phone. This is decided per breakpoint from the card count
+  against slides per view, not from Swiper's own state, which never reports "nothing to scroll" while
+  looping is on because looping adds duplicate slides.
 * Carousel autoplay pauses, and resumes when the video ends or is closed.
 * The card returns to its image when the video ends (**Video → Return To Image When Video Ends**).
 * A close button sits over the player (**Video → Close Button While Playing**).

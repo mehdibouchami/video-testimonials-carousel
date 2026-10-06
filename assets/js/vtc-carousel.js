@@ -104,6 +104,9 @@
 		// width inside a narrower frame.
 		var width = swiper.el ? Math.round( swiper.el.getBoundingClientRect().width ) : 0;
 
+		// Cheap, and must happen even when nothing else changed.
+		markNavigable( root, layout.spv );
+
 		if (
 			swiper.params.slidesPerView === layout.spv &&
 			swiper.params.spaceBetween === layout.gap &&
@@ -116,6 +119,24 @@
 		swiper.params.slidesPerView = layout.spv;
 		swiper.params.spaceBetween = layout.gap;
 		swiper.update();
+	}
+
+	/**
+	 * Hide the arrows and dots at breakpoints where every card already fits.
+	 *
+	 * Swiper's own "locked" state cannot be used for this: looping adds duplicate
+	 * slides, so it always believes there is somewhere to go. Comparing the real
+	 * card count against slides per view is true either way, and is re-evaluated
+	 * per breakpoint.
+	 *
+	 * @param {Element} root The .vtc element.
+	 * @param {number}  spv  Slides per view at the current breakpoint.
+	 */
+	function markNavigable( root, spv ) {
+		var cfg = root.vtcCfg || {};
+		var count = cfg.count || root.querySelectorAll( '.swiper-slide:not(.swiper-slide-duplicate)' ).length;
+
+		root.classList.toggle( 'vtc--fits', count <= spv );
 	}
 
 	function createSwiper( root, cfg ) {

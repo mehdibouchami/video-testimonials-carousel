@@ -4,7 +4,7 @@ Tags: elementor, carousel, testimonials, video, slider
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 
 == Changelog ==
 
+= 1.7.0 =
+* The arrows and dots now hide themselves at any breakpoint where every card already fits, and come back where they do not. Five cards shown five per row on desktop need no controls; the same five shown one per row on a phone do.
+
 = 1.6.0 =
 * Added Style → Arrows → Position, with the arrows either over the cards or beside them. Beside the cards reserves a gutter on each side so the arrows never cover a card. Set per device, since the gutters cost width on a phone.
 * The carousel now re-measures whenever its container changes width, not only when the window does. Slides could otherwise keep their old width inside a narrower frame.
@@ -130,6 +133,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.7.0 =
+Arrows and dots now hide at breakpoints where all the cards already fit.
 
 = 1.6.0 =
 Adds the option to place the carousel arrows beside the cards instead of over them, per device.
