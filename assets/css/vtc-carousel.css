@@ -201,7 +201,7 @@
  * Close button
  * ----------------------------------------------------------------------- */
 
-.vtc__close {
+.vtc .vtc__close {
 	position: absolute;
 	top: 8px;
 	right: 8px;
@@ -221,16 +221,28 @@
 }
 
 @media (hover: hover) {
-	.vtc__close:hover {
+	.vtc .vtc__close:hover {
 		background-color: rgba(0, 0, 0, 0.85);
 	}
 }
 
-.vtc__close:active {
+.vtc .vtc__close:active {
 	background-color: rgba(0, 0, 0, 0.85);
 }
 
-.vtc__close svg {
+/* Same defence as the arrows against theme-wide button:focus styling. */
+.vtc .vtc__close:focus {
+	color: #fff;
+	background-color: rgba(0, 0, 0, 0.6);
+	outline: none;
+}
+
+.vtc .vtc__close:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.vtc .vtc__close svg {
 	width: 16px;
 	height: 16px;
 	fill: none;
@@ -243,7 +255,7 @@
  * Arrows
  * ----------------------------------------------------------------------- */
 
-.vtc__arrow {
+.vtc .vtc__arrow {
 	position: absolute;
 	top: 50%;
 	z-index: 5;
@@ -265,15 +277,26 @@
 /* Hover only where a real pointer exists. On a touch screen :hover sticks to
    the last element tapped, which left the arrows stuck in their hover colour. */
 @media (hover: hover) {
-	.vtc__arrow:hover {
+	.vtc .vtc__arrow:hover {
 		color: var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff));
 		background-color: var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5)));
 	}
 }
 
-/* Keyboard focus. :focus-visible, not :focus, so a mouse click does not leave
-   the last arrow clicked wearing the focus colour. */
-.vtc__arrow:focus-visible {
+/* Themes commonly style every button:focus and button:hover on the page, which
+   outranks a single-class rule and leaves an arrow stuck in the theme's colour
+   after a click or a tap. These rules carry two classes so they win, and this
+   one puts a merely focused arrow back to its normal appearance. It must stay
+   above the :focus-visible rule below, which has equal specificity and so wins
+   on order when a keyboard is being used. */
+.vtc .vtc__arrow:focus {
+	color: var(--vtc-arrow-color, #fff);
+	background-color: var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5));
+	outline: none;
+}
+
+/* Keyboard focus only, so a mouse click never leaves an arrow wearing it. */
+.vtc .vtc__arrow:focus-visible {
 	color: var(--vtc-arrow-color-focus, var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff)));
 	background-color: var(--vtc-arrow-bg-focus, var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5))));
 	outline: 2px solid var(--vtc-arrow-outline-focus, currentColor);
@@ -281,12 +304,12 @@
 }
 
 /* Pressed state, which does apply on touch and releases cleanly. */
-.vtc__arrow:active {
+.vtc .vtc__arrow:active {
 	color: var(--vtc-arrow-color-active, var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff)));
 	background-color: var(--vtc-arrow-bg-active, var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5))));
 }
 
-.vtc__arrow svg {
+.vtc .vtc__arrow svg {
 	width: var(--vtc-arrow-size, 18px);
 	height: var(--vtc-arrow-size, 18px);
 	display: block;
@@ -297,15 +320,15 @@
 	stroke-linejoin: round;
 }
 
-.vtc__arrow--prev {
+.vtc .vtc__arrow--prev {
 	left: var(--vtc-arrow-offset, 8px);
 }
 
-.vtc__arrow--next {
+.vtc .vtc__arrow--next {
 	right: var(--vtc-arrow-offset, 8px);
 }
 
-.vtc__arrow.swiper-button-disabled {
+.vtc .vtc__arrow.swiper-button-disabled {
 	opacity: 0.35;
 	pointer-events: none;
 }
@@ -364,14 +387,14 @@
  * Misc
  * ----------------------------------------------------------------------- */
 
-.vtc__close[hidden] {
+.vtc .vtc__close[hidden] {
 	display: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.vtc__img,
 	.vtc__play,
-	.vtc__arrow {
+	.vtc .vtc__arrow {
 		transition: none;
 	}
 

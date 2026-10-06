@@ -4,7 +4,7 @@ Tags: elementor, carousel, testimonials, video, slider
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 
 == Changelog ==
 
+= 1.5.1 =
+* Fixed the arrows taking on the theme's button colour and keeping it after a click or a tap. Themes such as Astra style every button:hover and button:focus on the page, which outranked the widget's own styling. The arrow and close button rules now carry enough weight to win, and a merely focused arrow is put back to its normal colour.
+
 = 1.5.0 =
 * Added Video → On iPhone And iPad. Set it to "Wait for one tap" to keep the sound on YouTube and Vimeo: iOS only grants sound to a tap on the player itself, so starting the embed automatically can only ever play muted.
 * Added Focus colours for the arrows, applied on keyboard focus only.
@@ -123,6 +126,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.5.1 =
+Fixes the carousel arrows getting stuck in the theme's button colour after a click or tap.
 
 = 1.5.0 =
 Adds an iPhone and iPad option that keeps the sound on YouTube and Vimeo, and keyboard focus colours for the arrows.
