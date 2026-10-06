@@ -1,4 +1,4 @@
-# Video Testimonials Carousel
+# Video Testimonials Carousel for Elementor
 
 An Elementor widget: a carousel of portrait testimonial cards where each card *may* open a video in place.
 Cards with no video URL stay plain images — no play icon, no click behaviour, no JavaScript attached to them.
@@ -58,6 +58,39 @@ breaking.
   See the note below.
 * **Video → Preload** — applies only after a click; nothing is fetched before that.
 * **Style → Card → Aspect Ratio** — 9:16 by default, with 4:5, 1:1 and 16:9 available per device.
+
+## SEO
+
+Click-to-play is good for speed and privacy but bad for video indexing, and Google says so directly:
+*"Don't rely on user actions (such as swiping, clicking, or typing) to load the video."*
+([Video SEO best practices](https://developers.google.com/search/docs/appearance/video))
+
+The widget resolves that by declaring the videos independently of the DOM. With **SEO → VideoObject
+Schema** on, every card that has a video emits JSON-LD:
+
+| Property | Where it comes from | |
+|---|---|---|
+| `name` | Video Title, falling back to the card Label | required |
+| `thumbnailUrl` | the card image at full size | required |
+| `uploadDate` | Upload Date, falling back to the page's publish date | required |
+| `embedUrl` / `contentUrl` | derived from the video URL | required |
+| `description` | Video Description | recommended |
+| `duration` | Duration, converted from `1:23` to `PT1M23S` | recommended |
+
+A card is left out of the markup if it has no video, no title or no image, because Google treats items
+missing a required property as ineligible rather than partially valid. Switch the whole thing off if
+Yoast, Rank Math or similar already emits video schema for these pages — two VideoObject blocks for one
+video is worse than none.
+
+Fill in a real upload date and duration where you can. The page-date fallback keeps the markup *valid*,
+but it is not *true*, and accuracy is what earns rich results.
+
+Other search-facing details handled for you:
+
+* The first card image loads eagerly with `fetchpriority="high"` (**SEO → Preload First Images**), so the
+  carousel does not become a lazy-loaded Largest Contentful Paint element.
+* Images carry `width` and `height`, so cards reserve their space and do not shift.
+* The carousel is exposed as a labelled `region` with `aria-roledescription="carousel"`.
 
 ## Support
 

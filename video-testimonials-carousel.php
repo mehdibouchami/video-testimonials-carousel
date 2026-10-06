@@ -1,13 +1,14 @@
 <?php
 /**
- * Plugin Name:       Video Testimonials Carousel
+ * Plugin Name:       Video Testimonials Carousel for Elementor
  * Plugin URI:        https://github.com/mehdibouchami/video-testimonials-carousel
- * Description:       Elementor widget: a carousel of testimonial cards where each card may optionally open a YouTube, Vimeo or self-hosted video in place. Nothing video-related loads until a card is clicked.
- * Version:           1.1.1
+ * Description:       A carousel of testimonial cards where video is optional per card. Nothing video-related loads until a card is clicked, and VideoObject schema keeps the videos visible to search engines.
+ * Version:           1.2.0
  * Author:            Mehdi Bouchami
  * Author URI:        https://github.com/mehdibouchami
  * Requires at least: 5.9
  * Requires PHP:      7.4
+ * Requires Plugins:  elementor
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       video-testimonials-carousel
@@ -17,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'VTC_VERSION', '1.1.1' );
+define( 'VTC_VERSION', '1.2.0' );
 define( 'VTC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'VTC_URL', plugin_dir_url( __FILE__ ) );
 define( 'VTC_MIN_ELEMENTOR', '3.5.0' );

@@ -129,6 +129,7 @@ class VTC_Widget extends Widget_Base {
 		$this->register_items_section();
 		$this->register_carousel_section();
 		$this->register_video_section();
+		$this->register_seo_section();
 		$this->register_card_style_section();
 		$this->register_play_style_section();
 		$this->register_arrows_style_section();
@@ -175,6 +176,52 @@ class VTC_Widget extends Widget_Base {
 				'placeholder' => 'https://youtu.be/… · https://vimeo.com/… · …/clip.mp4',
 				'description' => esc_html__( 'Optional. Leave empty for a plain image card with no play behaviour. YouTube, Vimeo and direct media files (mp4, webm, mov…) are detected automatically.', 'video-testimonials-carousel' ),
 				'dynamic'     => array( 'active' => true ),
+			)
+		);
+
+		$repeater->add_control(
+			'seo_title',
+			array(
+				'label'       => esc_html__( 'Video Title', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::TEXT,
+				'label_block' => true,
+				'description' => esc_html__( 'Used for the VideoObject name. Google asks for unique text per video. Falls back to the Label.', 'video-testimonials-carousel' ),
+				'condition'   => array( 'video_url!' => '' ),
+				'dynamic'     => array( 'active' => true ),
+			)
+		);
+
+		$repeater->add_control(
+			'seo_description',
+			array(
+				'label'       => esc_html__( 'Video Description', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::TEXTAREA,
+				'rows'        => 3,
+				'description' => esc_html__( 'Recommended by Google, and unique per video.', 'video-testimonials-carousel' ),
+				'condition'   => array( 'video_url!' => '' ),
+				'dynamic'     => array( 'active' => true ),
+			)
+		);
+
+		$repeater->add_control(
+			'upload_date',
+			array(
+				'label'          => esc_html__( 'Upload Date', 'video-testimonials-carousel' ),
+				'type'           => Controls_Manager::DATE_TIME,
+				'picker_options' => array( 'enableTime' => false ),
+				'description'    => esc_html__( 'Required by Google. When the video was first published. Left empty, the page\'s own publish date is used so the markup stays valid, but a real date is better.', 'video-testimonials-carousel' ),
+				'condition'      => array( 'video_url!' => '' ),
+			)
+		);
+
+		$repeater->add_control(
+			'duration',
+			array(
+				'label'       => esc_html__( 'Duration', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::TEXT,
+				'placeholder' => '1:23',
+				'description' => esc_html__( 'Recommended. Minutes and seconds, like 1:23, or 1:02:30 with hours. Converted to the ISO 8601 form Google expects.', 'video-testimonials-carousel' ),
+				'condition'   => array( 'video_url!' => '' ),
 			)
 		);
 
@@ -507,6 +554,47 @@ class VTC_Widget extends Widget_Base {
 				),
 				'description' => esc_html__( 'YouTube gives no way to hide its title, channel name and Shorts watermark. Scaling the player past 100% pushes them outside the card. Around 130% clears both; the trade-off is that the video is zoomed in and loses a little top and bottom. Leave at 100% for Vimeo and self-hosted video, which need no cropping.', 'video-testimonials-carousel' ),
 				'selectors'   => array( '{{WRAPPER}} .vtc' => '--vtc-embed-zoom: calc({{SIZE}} / 100);' ),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	private function register_seo_section() {
+		$this->start_controls_section(
+			'section_seo',
+			array( 'label' => esc_html__( 'SEO', 'video-testimonials-carousel' ) )
+		);
+
+		$this->add_control(
+			'enable_schema',
+			array(
+				'label'        => esc_html__( 'VideoObject Schema', 'video-testimonials-carousel' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'description'  => esc_html__( 'Outputs JSON-LD describing each video, so search engines can see videos that only load when a visitor clicks. Turn off if an SEO plugin already outputs video schema for this page, to avoid duplicates.', 'video-testimonials-carousel' ),
+			)
+		);
+
+		$this->add_control(
+			'schema_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'Cards with no video URL are never included. A card is skipped if it has no title or no image, since Google treats both as required.', 'video-testimonials-carousel' ),
+				'content_classes' => 'elementor-descriptor',
+				'condition'       => array( 'enable_schema' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'eager_images',
+			array(
+				'label'       => esc_html__( 'Preload First Images', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::NUMBER,
+				'min'         => 0,
+				'max'         => 6,
+				'default'     => 1,
+				'description' => esc_html__( 'How many of the first card images load immediately instead of lazily. The first visible card is usually the page\'s largest element, and lazy-loading it delays Largest Contentful Paint. 0 lazy-loads everything.', 'video-testimonials-carousel' ),
 			)
 		);
 
@@ -1121,6 +1209,173 @@ class VTC_Widget extends Widget_Base {
 		return '';
 	}
 
+	/**
+	 * Width and height of the rendered image, so the browser reserves the box
+	 * and the card never shifts while loading.
+	 *
+	 * @param array $item     Repeater item.
+	 * @param array $settings Widget settings.
+	 * @return array{0:int,1:int} Zero values mean "unknown, omit the attributes".
+	 */
+	private function get_item_image_dimensions( $item, $settings ) {
+		if ( empty( $item['image']['id'] ) ) {
+			return array( 0, 0 );
+		}
+
+		$size = isset( $settings['card_image_size'] ) ? $settings['card_image_size'] : 'large';
+
+		if ( 'custom' === $size ) {
+			return array( 0, 0 );
+		}
+
+		$src = wp_get_attachment_image_src( $item['image']['id'], $size );
+
+		if ( ! $src || empty( $src[1] ) || empty( $src[2] ) ) {
+			return array( 0, 0 );
+		}
+
+		return array( (int) $src[1], (int) $src[2] );
+	}
+
+	/**
+	 * Full-size image URL for thumbnailUrl — Google prefers the largest available.
+	 *
+	 * @param array  $item     Repeater item.
+	 * @param string $fallback URL to use when there is no attachment.
+	 * @return string
+	 */
+	private function get_item_thumbnail( $item, $fallback ) {
+		if ( ! empty( $item['image']['id'] ) ) {
+			$full = wp_get_attachment_image_url( $item['image']['id'], 'full' );
+
+			if ( $full ) {
+				return $full;
+			}
+		}
+
+		return $fallback;
+	}
+
+	/**
+	 * Convert "1:23" or "1:02:30" to the ISO 8601 duration Google expects.
+	 *
+	 * A value already in ISO form is passed through untouched.
+	 *
+	 * @param string $value Raw duration.
+	 * @return string Empty when nothing usable was given.
+	 */
+	public static function iso_duration( $value ) {
+		$value = trim( (string) $value );
+
+		if ( '' === $value ) {
+			return '';
+		}
+
+		if ( preg_match( '~^P(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$~i', $value ) ) {
+			return strtoupper( $value );
+		}
+
+		if ( ! preg_match( '~^\d{1,3}(?::[0-5]?\d){0,2}$~', $value ) ) {
+			return '';
+		}
+
+		$parts = array_reverse( array_map( 'intval', explode( ':', $value ) ) );
+
+		$seconds = isset( $parts[0] ) ? $parts[0] : 0;
+		$minutes = isset( $parts[1] ) ? $parts[1] : 0;
+		$hours   = isset( $parts[2] ) ? $parts[2] : 0;
+
+		$out = 'PT';
+
+		if ( $hours ) {
+			$out .= $hours . 'H';
+		}
+
+		if ( $minutes ) {
+			$out .= $minutes . 'M';
+		}
+
+		if ( $seconds || ( ! $hours && ! $minutes ) ) {
+			$out .= $seconds . 'S';
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Upload date as ISO 8601. Falls back to the current post's publish date so
+	 * the markup keeps its required property rather than being dropped.
+	 *
+	 * @param string $value Raw date from the control.
+	 * @return string
+	 */
+	public static function iso_date( $value ) {
+		$value = trim( (string) $value );
+
+		if ( '' !== $value ) {
+			$timestamp = strtotime( $value );
+
+			if ( $timestamp ) {
+				return wp_date( 'c', $timestamp );
+			}
+		}
+
+		$post_id = get_the_ID();
+
+		if ( $post_id ) {
+			$published = get_post_time( 'c', false, $post_id );
+
+			if ( $published ) {
+				return $published;
+			}
+		}
+
+		return wp_date( 'c' );
+	}
+
+	/**
+	 * Build one VideoObject node, or an empty array when a required property
+	 * (name, thumbnailUrl, uploadDate, contentUrl/embedUrl) cannot be supplied.
+	 *
+	 * @param array $card Prepared card data.
+	 * @return array
+	 */
+	private function build_video_schema( $card ) {
+		$video = $card['video'];
+
+		if ( empty( $video['provider'] ) || '' === $card['schema_name'] || '' === $card['thumb'] ) {
+			return array();
+		}
+
+		$node = array(
+			'@context'     => 'https://schema.org',
+			'@type'        => 'VideoObject',
+			'name'         => $card['schema_name'],
+			'thumbnailUrl' => $card['thumb'],
+			'uploadDate'   => self::iso_date( $card['upload_date'] ),
+		);
+
+		if ( 'self' === $video['provider'] ) {
+			$node['contentUrl'] = $video['src'];
+		} elseif ( 'youtube' === $video['provider'] ) {
+			$node['embedUrl'] = 'https://www.youtube.com/embed/' . $video['id'];
+		} elseif ( 'vimeo' === $video['provider'] ) {
+			$node['embedUrl'] = 'https://player.vimeo.com/video/' . $video['id'];
+		}
+
+		if ( '' !== $card['schema_description'] ) {
+			$node['description'] = $card['schema_description'];
+		}
+
+		$duration = self::iso_duration( $card['duration'] );
+
+		if ( '' !== $duration ) {
+			$node['duration'] = $duration;
+		}
+
+		return $node;
+	}
+
 	private function play_icon_svg() {
 		return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.3-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14z"/></svg>';
 	}
@@ -1146,12 +1401,22 @@ class VTC_Widget extends Widget_Base {
 			}
 
 			$label = isset( $item['label'] ) ? trim( (string) $item['label'] ) : '';
+			$title = isset( $item['seo_title'] ) ? trim( (string) $item['seo_title'] ) : '';
+
+			list( $width, $height ) = $this->get_item_image_dimensions( $item, $settings );
 
 			$cards[] = array(
-				'image' => $image_url,
-				'alt'   => $this->get_item_alt( $item, $label ),
-				'label' => $label,
-				'video' => self::detect_video( isset( $item['video_url'] ) ? $item['video_url'] : '' ),
+				'image'              => $image_url,
+				'thumb'              => $this->get_item_thumbnail( $item, $image_url ),
+				'width'              => $width,
+				'height'             => $height,
+				'alt'                => $this->get_item_alt( $item, $label ),
+				'label'              => $label,
+				'schema_name'        => '' !== $title ? $title : $label,
+				'schema_description' => isset( $item['seo_description'] ) ? trim( (string) $item['seo_description'] ) : '',
+				'upload_date'        => isset( $item['upload_date'] ) ? (string) $item['upload_date'] : '',
+				'duration'           => isset( $item['duration'] ) ? (string) $item['duration'] : '',
+				'video'              => self::detect_video( isset( $item['video_url'] ) ? $item['video_url'] : '' ),
 			);
 		}
 
@@ -1188,8 +1453,12 @@ class VTC_Widget extends Widget_Base {
 
 		$show_play  = 'yes' === $settings['show_play_icon'];
 		$show_close = 'yes' === $settings['show_close'];
+		$eager      = isset( $settings['eager_images'] ) ? (int) $settings['eager_images'] : 1;
+		$index      = 0;
 		?>
-		<div class="vtc" data-vtc="<?php echo esc_attr( wp_json_encode( $config ) ); ?>" data-fit="<?php echo esc_attr( $settings['embed_fit'] ); ?>">
+		<div class="vtc" data-vtc="<?php echo esc_attr( wp_json_encode( $config ) ); ?>" data-fit="<?php echo esc_attr( $settings['embed_fit'] ); ?>"
+			role="region" aria-roledescription="carousel"
+			aria-label="<?php echo esc_attr__( 'Video testimonials', 'video-testimonials-carousel' ); ?>">
 			<div class="vtc__swiper swiper swiper-container">
 				<div class="swiper-wrapper">
 					<?php foreach ( $cards as $card ) : ?>
@@ -1227,11 +1496,24 @@ class VTC_Widget extends Widget_Base {
 									<?php endif; ?>
 								<?php endif; ?>
 							>
+								<?php
+								// The first visible card is usually the LCP element, and a
+								// lazy-loaded LCP image measurably delays it.
+								$is_eager = $index < $eager;
+								++$index;
+								?>
 								<img
 									class="vtc__img"
 									src="<?php echo esc_url( $card['image'] ); ?>"
 									alt="<?php echo esc_attr( $card['alt'] ); ?>"
-									loading="lazy"
+									<?php if ( $card['width'] && $card['height'] ) : ?>
+										width="<?php echo esc_attr( $card['width'] ); ?>"
+										height="<?php echo esc_attr( $card['height'] ); ?>"
+									<?php endif; ?>
+									loading="<?php echo $is_eager ? 'eager' : 'lazy'; ?>"
+									<?php if ( 1 === $index && $is_eager ) : ?>
+										fetchpriority="high"
+									<?php endif; ?>
 									decoding="async"
 								/>
 
@@ -1267,5 +1549,47 @@ class VTC_Widget extends Widget_Base {
 			<?php endif; ?>
 		</div>
 		<?php
+		$this->render_schema( $cards, 'yes' === $settings['enable_schema'] );
+	}
+
+	/**
+	 * Emit VideoObject JSON-LD for the cards that carry a video.
+	 *
+	 * The players are only built on click, so without this the videos are
+	 * invisible to search engines.
+	 *
+	 * @param array $cards   Prepared cards.
+	 * @param bool  $enabled Whether the schema control is on.
+	 */
+	private function render_schema( $cards, $enabled ) {
+		if ( ! $enabled ) {
+			return;
+		}
+
+		$nodes = array();
+
+		foreach ( $cards as $card ) {
+			$node = $this->build_video_schema( $card );
+
+			if ( ! empty( $node ) ) {
+				$nodes[] = $node;
+			}
+		}
+
+		if ( empty( $nodes ) ) {
+			return;
+		}
+
+		// JSON_HEX_TAG turns < and > into escapes, so no value can close the script tag.
+		$json = wp_json_encode(
+			1 === count( $nodes ) ? $nodes[0] : $nodes,
+			JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+		);
+
+		if ( false === $json ) {
+			return;
+		}
+
+		echo '<script type="application/ld+json">' . $json . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON-LD, escaped above.
 	}
 }
