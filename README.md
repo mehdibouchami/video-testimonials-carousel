@@ -69,6 +69,10 @@ breaking.
   provider's play button instead; that tap plays with sound. Costs iOS visitors one extra tap, affects embeds
   only, and leaves every other device untouched. Self-hosted video already plays with sound everywhere.
 * **Style → Card → Aspect Ratio** — 9:16 by default, with 4:5, 1:1 and 16:9 available per device.
+* **Style → Arrows → Position** — *Over the cards* (default) or *Beside the cards*. Beside reserves a gutter
+  the width of one arrow plus the offset on each side, so the arrows never cover a card and never spill into
+  whatever sits next to the carousel. The carousel narrows by both gutters, which is expensive at phone
+  widths — the control is per device, so you can have them beside on desktop and over the cards on mobile.
 
 ## SEO
 

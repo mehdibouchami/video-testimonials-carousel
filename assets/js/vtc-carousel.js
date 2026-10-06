@@ -97,10 +97,22 @@
 		var fallback = configFallback( root.vtcCfg || {} );
 		var layout = readLayout( root, fallback.spv, fallback.gap );
 
-		if ( swiper.params.slidesPerView === layout.spv && swiper.params.spaceBetween === layout.gap ) {
+		// The container can change width without the window doing so: arrows
+		// moving outside reserve a gutter, the editor re-renders, a parent column
+		// resizes, a tab or accordion reveals the carousel. Swiper does not
+		// re-measure on its own in those cases, which leaves slides at their old
+		// width inside a narrower frame.
+		var width = swiper.el ? Math.round( swiper.el.getBoundingClientRect().width ) : 0;
+
+		if (
+			swiper.params.slidesPerView === layout.spv &&
+			swiper.params.spaceBetween === layout.gap &&
+			root.vtcWidth === width
+		) {
 			return;
 		}
 
+		root.vtcWidth = width;
 		swiper.params.slidesPerView = layout.spv;
 		swiper.params.spaceBetween = layout.gap;
 		swiper.update();
@@ -774,6 +786,30 @@
 
 		// Fonts and late CSS can change the computed properties after init.
 		syncLayout( root );
+
+		// Catches every container resize, including the ones no window event
+		// reports. The work is deferred to the next frame rather than done inside
+		// the callback: re-measuring resizes the slides, which would resize the
+		// thing being observed, and the browser then drops notifications to break
+		// the loop — leaving slides at a stale width about two times in three.
+		if ( typeof window.ResizeObserver === 'function' && root.vtcSwiper && root.vtcSwiper.el ) {
+			var pending = false;
+
+			root.vtcResizeObserver = new window.ResizeObserver( function () {
+				if ( pending ) {
+					return;
+				}
+
+				pending = true;
+
+				window.requestAnimationFrame( function () {
+					pending = false;
+					syncLayout( root );
+				} );
+			} );
+
+			root.vtcResizeObserver.observe( root.vtcSwiper.el );
+		}
 	}
 
 	var resizeTimer = null;
@@ -791,6 +827,14 @@
 
 	window.addEventListener( 'resize', onViewportChange );
 	window.addEventListener( 'orientationchange', onViewportChange );
+
+	// A hidden tab runs no animation frames, so a resize that happened while it
+	// was in the background has not been applied yet when it comes back.
+	document.addEventListener( 'visibilitychange', function () {
+		if ( ! document.hidden ) {
+			onViewportChange();
+		}
+	} );
 
 	function initAll( scope ) {
 		var context = scope && scope.querySelectorAll ? scope : document;

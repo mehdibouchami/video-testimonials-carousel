@@ -902,6 +902,25 @@ class VTC_Widget extends Widget_Base {
 		);
 
 		$this->add_responsive_control(
+			'arrow_position',
+			array(
+				'label'                => esc_html__( 'Position', 'video-testimonials-carousel' ),
+				'type'                 => Controls_Manager::SELECT,
+				'default'              => 'inside',
+				'options'              => array(
+					'inside'  => esc_html__( 'Over the cards', 'video-testimonials-carousel' ),
+					'outside' => esc_html__( 'Beside the cards', 'video-testimonials-carousel' ),
+				),
+				'description'          => esc_html__( 'Beside the cards reserves a gutter on each side and puts the arrows in it, so they never cover a card. The carousel narrows by the width of both gutters, which is costly on a phone — set it per device.', 'video-testimonials-carousel' ),
+				'selectors_dictionary' => array(
+					'inside'  => '0',
+					'outside' => '1',
+				),
+				'selectors'            => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-space: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
 			'arrow_box',
 			array(
 				'label'      => esc_html__( 'Button Size', 'video-testimonials-carousel' ),
@@ -981,7 +1000,7 @@ class VTC_Widget extends Widget_Base {
 					'size' => 8,
 					'unit' => 'px',
 				),
-				'description' => esc_html__( 'Negative values push the arrows outside the carousel.', 'video-testimonials-carousel' ),
+				'description' => esc_html__( 'Over the cards: how far in from the edge the arrows sit. Beside the cards: the space between each arrow and the carousel.', 'video-testimonials-carousel' ),
 				'selectors'   => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-offset: {{SIZE}}{{UNIT}};' ),
 			)
 		);

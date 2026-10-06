@@ -5,8 +5,14 @@
  * before a single Elementor control has been touched.
  */
 
+/* --vtc-arrow-space is 0 for arrows over the cards and 1 for arrows beside
+   them. At 1 the carousel reserves a gutter the width of one arrow plus the
+   offset on each side, so the arrows sit outside the cards instead of over
+   them. Elementor writes the value per breakpoint, so it can differ by device. */
 .vtc {
 	position: relative;
+	padding-left: calc(var(--vtc-arrow-space, 0) * (var(--vtc-arrow-box, 44px) + var(--vtc-arrow-offset, 8px)));
+	padding-right: calc(var(--vtc-arrow-space, 0) * (var(--vtc-arrow-box, 44px) + var(--vtc-arrow-offset, 8px)));
 }
 
 /* --------------------------------------------------------------------------
@@ -320,12 +326,15 @@
 	stroke-linejoin: round;
 }
 
+/* Absolutely positioned boxes resolve against the padding box, so 0 lands in
+   the gutter the padding above reserved. Over the cards there is no gutter and
+   the offset applies as before. */
 .vtc .vtc__arrow--prev {
-	left: var(--vtc-arrow-offset, 8px);
+	left: calc((1 - var(--vtc-arrow-space, 0)) * var(--vtc-arrow-offset, 8px));
 }
 
 .vtc .vtc__arrow--next {
-	right: var(--vtc-arrow-offset, 8px);
+	right: calc((1 - var(--vtc-arrow-space, 0)) * var(--vtc-arrow-offset, 8px));
 }
 
 .vtc .vtc__arrow.swiper-button-disabled {
