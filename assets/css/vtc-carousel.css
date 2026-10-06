@@ -62,8 +62,10 @@
 	cursor: pointer;
 }
 
-.vtc__card--video:hover .vtc__img {
-	transform: scale(var(--vtc-zoom, 1.05));
+@media (hover: hover) {
+	.vtc__card--video:hover .vtc__img {
+		transform: scale(var(--vtc-zoom, 1.05));
+	}
 }
 
 .vtc__card--video:focus-visible {
@@ -103,11 +105,18 @@
 	fill: currentColor;
 }
 
-.vtc__card--video:hover .vtc__play,
 .vtc__card--video:focus-visible .vtc__play {
 	color: var(--vtc-play-color-hover, var(--vtc-play-color, #fff));
 	background-color: var(--vtc-play-bg-hover, var(--vtc-play-bg, rgba(0, 0, 0, 0.45)));
 	transform: translate(-50%, -50%) scale(var(--vtc-play-scale, 1.08));
+}
+
+@media (hover: hover) {
+	.vtc__card--video:hover .vtc__play {
+		color: var(--vtc-play-color-hover, var(--vtc-play-color, #fff));
+		background-color: var(--vtc-play-bg-hover, var(--vtc-play-bg, rgba(0, 0, 0, 0.45)));
+		transform: translate(-50%, -50%) scale(var(--vtc-play-scale, 1.08));
+	}
 }
 
 /* --------------------------------------------------------------------------
@@ -211,7 +220,13 @@
 	transition: background-color 0.2s ease;
 }
 
-.vtc__close:hover {
+@media (hover: hover) {
+	.vtc__close:hover {
+		background-color: rgba(0, 0, 0, 0.85);
+	}
+}
+
+.vtc__close:active {
 	background-color: rgba(0, 0, 0, 0.85);
 }
 
@@ -247,9 +262,19 @@
 	transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
-.vtc__arrow:hover {
-	color: var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff));
-	background-color: var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5)));
+/* Hover only where a real pointer exists. On a touch screen :hover sticks to
+   the last element tapped, which left the arrows stuck in their hover colour. */
+@media (hover: hover) {
+	.vtc__arrow:hover {
+		color: var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff));
+		background-color: var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5)));
+	}
+}
+
+/* Pressed state, which does apply on touch and releases cleanly. */
+.vtc__arrow:active {
+	color: var(--vtc-arrow-color-active, var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff)));
+	background-color: var(--vtc-arrow-bg-active, var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5))));
 }
 
 .vtc__arrow svg {

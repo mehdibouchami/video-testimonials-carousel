@@ -4,7 +4,7 @@ Tags: elementor, carousel, testimonials, video, slider
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,11 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 
 == Changelog ==
 
+= 1.4.0 =
+* Added an Active colour and background for the arrows, shown while an arrow is pressed.
+* Fixed the arrows keeping their hover colour after a tap on touch screens. Hover styling is now limited to devices that actually have a pointer, which also stops the card zoom and the close button sticking.
+* Fixed self-hosted video sometimes playing muted on iPhone. Playback was being started before the video element was in the page, which iOS refuses, and the fallback then muted it to get it playing at all.
+
 = 1.3.0 =
 * A playing video now stops when its card is swiped past or scrolled out of view, instead of carrying on unseen. Choose Pause or Keep playing instead under Video → When Scrolled Out Of View.
 * Measured from how much of the card is actually visible, so it behaves correctly at any number of slides per view.
@@ -114,6 +119,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+Fixes arrows staying stuck in their hover colour after a tap, and self-hosted video playing muted on iPhone.
 
 = 1.3.0 =
 Videos no longer keep playing after you swipe past them, which mattered most on phones showing one card at a time.

@@ -1025,6 +1025,40 @@ class VTC_Widget extends Widget_Base {
 		);
 
 		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'tab_arrow_active',
+			array( 'label' => esc_html__( 'Active', 'video-testimonials-carousel' ) )
+		);
+
+		$this->add_control(
+			'arrow_active_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'Shown while the arrow is being pressed. On touch screens this is the state that applies, since hover does not exist there.', 'video-testimonials-carousel' ),
+				'content_classes' => 'elementor-descriptor',
+			)
+		);
+
+		$this->add_control(
+			'arrow_color_active',
+			array(
+				'label'     => esc_html__( 'Icon Color', 'video-testimonials-carousel' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-color-active: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'arrow_bg_active',
+			array(
+				'label'     => esc_html__( 'Background', 'video-testimonials-carousel' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-bg-active: {{VALUE}};' ),
+			)
+		);
+
+		$this->end_controls_tab();
 		$this->end_controls_tabs();
 
 		$this->end_controls_section();

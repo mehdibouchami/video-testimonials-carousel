@@ -253,6 +253,11 @@
 		return iframe;
 	}
 
+	/**
+	 * Build the element only. Playback is started after it is in the document,
+	 * because iOS refuses to play a detached media element and then our retry
+	 * would quietly mute it.
+	 */
 	function buildSelfHosted( card, cfg, onEnded ) {
 		var video = document.createElement( 'video' );
 		var poster = card.querySelector( '.vtc__img' );
@@ -278,23 +283,35 @@
 			video.addEventListener( 'ended', onEnded );
 		}
 
+		return video;
+	}
+
+	/**
+	 * Start a self-hosted video, once it is in the document.
+	 *
+	 * Must stay synchronous with the click that triggered it: iOS only allows
+	 * sound when play() comes directly out of the gesture handler.
+	 *
+	 * @param {HTMLVideoElement} video The video element.
+	 */
+	function startSelfHosted( video ) {
 		var attempt = video.play();
 
-		if ( attempt && typeof attempt.catch === 'function' ) {
-			attempt.catch( function () {
-				// Blocked by the browser's autoplay policy: muting is the one thing
-				// that reliably gets a play through.
-				video.muted = true;
-
-				var retry = video.play();
-
-				if ( retry && typeof retry.catch === 'function' ) {
-					retry.catch( function () {} );
-				}
-			} );
+		if ( ! attempt || typeof attempt.catch !== 'function' ) {
+			return;
 		}
 
-		return video;
+		attempt.catch( function () {
+			// Refused even with the gesture. Muting is the only thing that
+			// reliably gets a play through, so it beats a dead card.
+			video.muted = true;
+
+			var retry = video.play();
+
+			if ( retry && typeof retry.catch === 'function' ) {
+				retry.catch( function () {} );
+			}
+		} );
 	}
 
 	/**
@@ -584,6 +601,10 @@
 		}
 
 		holder.appendChild( node );
+
+		if ( 'self' === provider ) {
+			startSelfHosted( node );
+		}
 
 		if ( 'self' !== provider && cfg.revertOnEnd ) {
 			onMessage = listenForEnd( provider, node, onEnded );
