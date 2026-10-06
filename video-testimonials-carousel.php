@@ -3,7 +3,7 @@
  * Plugin Name:       Video Testimonials Carousel for Elementor
  * Plugin URI:        https://github.com/mehdibouchami/video-testimonials-carousel
  * Description:       A carousel of testimonial cards where video is optional per card. Nothing video-related loads until a card is clicked, and VideoObject schema keeps the videos visible to search engines.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Author:            Mehdi Bouchami
  * Author URI:        https://github.com/mehdibouchami
  * Requires at least: 5.9
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'VTC_VERSION', '1.4.0' );
+define( 'VTC_VERSION', '1.5.0' );
 define( 'VTC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'VTC_URL', plugin_dir_url( __FILE__ ) );
 define( 'VTC_MIN_ELEMENTOR', '3.5.0' );

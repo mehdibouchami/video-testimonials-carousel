@@ -4,7 +4,7 @@ Tags: elementor, carousel, testimonials, video, slider
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,10 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 
 == Changelog ==
 
+= 1.5.0 =
+* Added Video → On iPhone And iPad. Set it to "Wait for one tap" to keep the sound on YouTube and Vimeo: iOS only grants sound to a tap on the player itself, so starting the embed automatically can only ever play muted.
+* Added Focus colours for the arrows, applied on keyboard focus only.
+
 = 1.4.0 =
 * Added an Active colour and background for the arrows, shown while an arrow is pressed.
 * Fixed the arrows keeping their hover colour after a tap on touch screens. Hover styling is now limited to devices that actually have a pointer, which also stops the card zoom and the close button sticking.
@@ -119,6 +123,9 @@ No. The free Elementor plugin, version 3.5 or newer, is enough.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+Adds an iPhone and iPad option that keeps the sound on YouTube and Vimeo, and keyboard focus colours for the arrows.
 
 = 1.4.0 =
 Fixes arrows staying stuck in their hover colour after a tap, and self-hosted video playing muted on iPhone.

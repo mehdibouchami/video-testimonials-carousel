@@ -271,6 +271,15 @@
 	}
 }
 
+/* Keyboard focus. :focus-visible, not :focus, so a mouse click does not leave
+   the last arrow clicked wearing the focus colour. */
+.vtc__arrow:focus-visible {
+	color: var(--vtc-arrow-color-focus, var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff)));
+	background-color: var(--vtc-arrow-bg-focus, var(--vtc-arrow-bg-hover, var(--vtc-arrow-bg, rgba(0, 0, 0, 0.5))));
+	outline: 2px solid var(--vtc-arrow-outline-focus, currentColor);
+	outline-offset: 2px;
+}
+
 /* Pressed state, which does apply on touch and releases cleanly. */
 .vtc__arrow:active {
 	color: var(--vtc-arrow-color-active, var(--vtc-arrow-color-hover, var(--vtc-arrow-color, #fff)));

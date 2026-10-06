@@ -551,6 +551,20 @@ class VTC_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'ios_embed',
+			array(
+				'label'       => esc_html__( 'On iPhone And iPad', 'video-testimonials-carousel' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'autoplay',
+				'options'     => array(
+					'autoplay' => esc_html__( 'Start at once, muted by iOS', 'video-testimonials-carousel' ),
+					'tap'      => esc_html__( 'Wait for one tap, and keep the sound', 'video-testimonials-carousel' ),
+				),
+				'description' => esc_html__( 'iOS only allows sound when the viewer taps the player itself, so a tap on the card cannot start a YouTube or Vimeo embed unmuted. Starting at once means iOS mutes it. Waiting for a tap shows the provider\'s own play button, and that tap plays with sound. Affects iPhone and iPad only, and embeds only — self-hosted video already plays with sound.', 'video-testimonials-carousel' ),
+			)
+		);
+
+		$this->add_control(
 			'embed_zoom',
 			array(
 				'label'       => esc_html__( 'Crop Provider Chrome', 'video-testimonials-carousel' ),
@@ -1021,6 +1035,49 @@ class VTC_Widget extends Widget_Base {
 				'label'     => esc_html__( 'Background', 'video-testimonials-carousel' ),
 				'type'      => Controls_Manager::COLOR,
 				'selectors' => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-bg-hover: {{VALUE}};' ),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'tab_arrow_focus',
+			array( 'label' => esc_html__( 'Focus', 'video-testimonials-carousel' ) )
+		);
+
+		$this->add_control(
+			'arrow_focus_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'Shown when the arrow is reached with the keyboard. Deliberately not applied to mouse clicks, which would leave the colour stuck on the last arrow clicked.', 'video-testimonials-carousel' ),
+				'content_classes' => 'elementor-descriptor',
+			)
+		);
+
+		$this->add_control(
+			'arrow_color_focus',
+			array(
+				'label'     => esc_html__( 'Icon Color', 'video-testimonials-carousel' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-color-focus: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'arrow_bg_focus',
+			array(
+				'label'     => esc_html__( 'Background', 'video-testimonials-carousel' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-bg-focus: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'arrow_outline_focus',
+			array(
+				'label'     => esc_html__( 'Outline', 'video-testimonials-carousel' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .vtc' => '--vtc-arrow-outline-focus: {{VALUE}};' ),
 			)
 		);
 
@@ -1499,6 +1556,7 @@ class VTC_Widget extends Widget_Base {
 			'minimalBranding'    => 'yes' === $settings['minimal_branding'],
 			'embedMuted'         => 'yes' === $settings['embed_muted'],
 			'embedControls'      => 'yes' === $settings['embed_controls'],
+			'iosEmbed'           => isset( $settings['ios_embed'] ) ? (string) $settings['ios_embed'] : 'autoplay',
 		);
 
 		$show_play  = 'yes' === $settings['show_play_icon'];

@@ -191,12 +191,41 @@
 	 * Players
 	 * --------------------------------------------------------------- */
 
+	/**
+	 * iPhone or iPad, including an iPad reporting itself as a Mac, which it has
+	 * done since iPadOS 13 — hence the touch-point check rather than the UA alone.
+	 *
+	 * @return {boolean}
+	 */
+	function isAppleTouchDevice() {
+		var ua = navigator.userAgent || '';
+
+		if ( /iPad|iPhone|iPod/.test( ua ) ) {
+			return true;
+		}
+
+		return /Mac/.test( ua ) && navigator.maxTouchPoints > 1;
+	}
+
+	/**
+	 * iOS grants sound only to a gesture made on the player itself, and a tap on
+	 * our card is not a gesture inside a cross-origin iframe. So asking for
+	 * autoplay there buys muted playback. Skipping autoplay leaves the provider's
+	 * own play button, and that tap plays with sound.
+	 *
+	 * @param {Object} cfg Widget config.
+	 * @return {boolean}
+	 */
+	function shouldAutoplayEmbed( cfg ) {
+		return ! ( 'tap' === cfg.iosEmbed && isAppleTouchDevice() );
+	}
+
 	function buildYouTube( card, cfg ) {
 		var id = card.getAttribute( 'data-id' );
 		var host = cfg.privacy ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com';
 
 		var params = [
-			'autoplay=1',
+			'autoplay=' + ( shouldAutoplayEmbed( cfg ) ? '1' : '0' ),
 			'playsinline=1',
 			'enablejsapi=1',
 			'controls=' + ( cfg.embedControls ? '1' : '0' ),
@@ -224,7 +253,7 @@
 		var hash = card.getAttribute( 'data-hash' );
 
 		var params = [
-			'autoplay=1',
+			'autoplay=' + ( shouldAutoplayEmbed( cfg ) ? '1' : '0' ),
 			'playsinline=1',
 			'controls=' + ( cfg.embedControls ? '1' : '0' ),
 			'muted=' + ( cfg.embedMuted ? '1' : '0' )

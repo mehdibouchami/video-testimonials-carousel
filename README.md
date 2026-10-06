@@ -63,6 +63,11 @@ breaking.
 * **Video → Crop Provider Chrome** — the only way to remove YouTube's title and channel bar.
   See the note below.
 * **Video → Preload** — applies only after a click; nothing is fetched before that.
+* **Video → On iPhone And iPad** — iOS grants sound only to a tap on the player itself, and a tap on the card
+  is not a gesture inside a cross-origin iframe. So a YouTube or Vimeo embed that starts by itself can only
+  ever start muted, whatever Start Muted says. Set this to *Wait for one tap* and the embed loads showing the
+  provider's play button instead; that tap plays with sound. Costs iOS visitors one extra tap, affects embeds
+  only, and leaves every other device untouched. Self-hosted video already plays with sound everywhere.
 * **Style → Card → Aspect Ratio** — 9:16 by default, with 4:5, 1:1 and 16:9 available per device.
 
 ## SEO
